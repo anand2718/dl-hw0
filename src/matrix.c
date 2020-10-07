@@ -52,10 +52,29 @@ matrix copy_matrix(matrix m)
 {
     matrix c = make_matrix(m.rows, m.cols);
     // TODO: 1.1 - Fill in the new matrix
-
+    memcpy(c.data, m.data, m.rows*m.cols*sizeof(float));
 
     return c;
 }
+
+void transpose_matrix_helper(int total_rows, int total_cols, int rows, int cols, float *out, float *in, int c_row, int c_col) {
+    if (rows < 32 && cols < 32) {
+        for(int i = c_row; i < c_row+rows; i++) {
+            for(int j = c_col; j < c_col+cols; j++)
+            {
+                out[j*total_rows + i] = in[i*total_cols + j];
+            }
+        }      
+    } else {
+        if (rows > cols) {
+            transpose_matrix_helper(total_rows, total_cols, rows / 2, cols, out, in, c_row, c_col);
+            transpose_matrix_helper(total_rows, total_cols, (rows / 2) + rows % 2, cols, out, in, c_row + (rows / 2), c_col);
+        } else {
+            transpose_matrix_helper(total_rows, total_cols, rows, cols / 2, out, in, c_row, c_col);
+            transpose_matrix_helper(total_rows, total_cols, rows, (cols / 2) + cols % 2, out, in, c_row, c_col + (cols / 2));
+        }
+    }
+};
 
 // Transpose a matrix
 // matrix m: matrix to be transposed
@@ -63,9 +82,8 @@ matrix copy_matrix(matrix m)
 matrix transpose_matrix(matrix m)
 {
     // TODO: 1.2 - Make a matrix the correct size, fill it in
-    matrix t = make_matrix(1,1);
-
-
+    matrix t = make_matrix(m.cols,m.rows);
+    transpose_matrix_helper(m.rows, m.cols, m.rows, m.cols, t.data, m.data, 0, 0);
     return t;
 }
 
@@ -78,6 +96,11 @@ void axpy_matrix(float a, matrix x, matrix y)
     assert(x.cols == y.cols);
     assert(x.rows == y.rows);
     // TODO: 1.3 - Perform the weighted sum, store result back in y
+    for(int i = 0; i < x.rows; i++) {
+        for(int j = 0; j < x.cols; j++) {
+            y.data[i * y.cols + j] = a * x.data[i * x.cols + j] + y.data[i * y.cols + j];
+        }
+    }  
 }
 
 // Perform matrix multiplication a*b, return result
@@ -87,8 +110,20 @@ matrix matmul(matrix a, matrix b)
 {
     matrix c = make_matrix(a.rows, b.cols);
     // TODO: 1.4 - Implement matrix multiplication. Make sure it's fast!
+    assert(a.cols == b.rows);
+    assert(a.rows == b.cols);
 
-
+    // Writing the naive version first to understand mult
+    // TODO: optimize the loop ordering
+    for(int i = 0; i < a.rows; i++) {
+        for(int j = 0; j < b.cols; j++) {
+            int sum  = 0;
+            for(int k = 0; k < a.cols; k++) {
+                sum += a.data[i * a.cols + k] * b.data[(i + k) * b.cols + j];
+            }
+            c.data[i * c.cols + j] = sum;
+        }
+    }
 
     return c;
 }
