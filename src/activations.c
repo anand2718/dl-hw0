@@ -9,23 +9,34 @@
 void activate_matrix(matrix m, ACTIVATION a)
 {
     int i, j;
-    for(i = 0; i < m.rows; ++i){
+    for(i = 0; i < m.rows; ++i) {
         double sum = 0;
-        for(j = 0; j < m.cols; ++j){
+        for(j = 0; j < m.cols; ++j) {
             double x = m.data[i*m.cols + j];
-            if(a == LOGISTIC){
-                // TODO
-            } else if (a == RELU){
-                // TODO
-            } else if (a == LRELU){
-                // TODO
-            } else if (a == SOFTMAX){
-                // TODO
+            switch (a) {
+            case LOGISTIC:
+                x = 1 / (1 + exp(-x));
+                break;
+            case RELU:
+                if (x <= 0) {
+                    x = 0;
+                }
+                break;
+            case LRELU:
+                if (x <= 0) {
+                    x = .01 * x;
+                }
+                break;
+            case SOFTMAX:
+                x = exp(x);
             }
-            sum += m.data[i*m.cols + j];
+            m.data[i * m.cols + j] = x;
+            sum += x;
         }
         if (a == SOFTMAX) {
-            // TODO: have to normalize by sum if we are using SOFTMAX
+            for (j = 0; j < m.cols; j++) {
+                m.data[i * m.cols + j] /= sum;
+            }
         }
     }
 }
