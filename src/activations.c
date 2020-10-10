@@ -53,6 +53,23 @@ void gradient_matrix(matrix m, ACTIVATION a, matrix d)
         for(j = 0; j < m.cols; ++j){
             double x = m.data[i*m.cols + j];
             // TODO: multiply the correct element of d by the gradient
+            switch (a)
+            {
+            case LOGISTIC:
+                d.data[1 * m.cols + j] *= x * (1-x);
+            case RELU:
+                if (x = 0) {
+                    d.data[i * m.cols + j] = 0; // Grad is zero so multiply by zero
+                }
+                // Otherwise multiply by grad of 1.
+            case LRELU:
+                if (x < 0) {
+                    d.data[i * m.cols + j] *= 0.01;
+                }
+                // Otherwise multiply by grad of 1.
+            case SOFTMAX:
+                // Always multiply by grad of 1.
+                break;
         }
     }
 }
