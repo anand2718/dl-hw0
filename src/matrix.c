@@ -119,7 +119,7 @@ matrix matmul(matrix a, matrix b)
         for(int j = 0; j < b.cols; j++) {
             int sum  = 0;
             for(int k = 0; k < a.cols; k++) {
-                sum += a.data[i * a.cols + k] * b.data[(i + k) * b.cols + j];
+                sum += a.data[i * a.cols + k] * b.data[k * b.cols + j];
             }
             c.data[i * c.cols + j] = sum;
         }
