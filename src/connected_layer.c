@@ -26,7 +26,7 @@ void backward_bias(matrix delta, matrix db)
     int i, j;
     for(i = 0; i < delta.rows; ++i){
         for(j = 0; j < delta.cols; ++j){
-            db.data[j] += delta.data[i*delta.cols + j];
+            db.data[j] += -delta.data[i*delta.cols + j];
         }
     }
 }
@@ -72,8 +72,9 @@ void backward_connected_layer(layer l, matrix prev_delta)
 
     backward_bias(delta, l.db);
 
-    // Then calculate dL/dw. Use axpy to add this dL/dw into any previously stored
+    // Then calculate dL/dw. Use axpy to subtract this dL/dw into any previously stored
     // updates for our weights, which are stored in l.dw
+    // l.dw = l.dw - dL/dw
 
     axpy_matrix(1, matmul(transpose_matrix(l.w), delta), l.dw);
 
@@ -87,21 +88,23 @@ void backward_connected_layer(layer l, matrix prev_delta)
 // Update 
 void update_connected_layer(layer l, float rate, float momentum, float decay)
 {
-    // TODO
-    // assume l.dw = m*l.dw_prev - dL/dw
-    //l.dw -= decay * l.w;
-    //l.w = rate * l.dw;
+    // TODO: 3.3
+    // Currently l.dw and l.db store:
+    // l.dw = momentum * l.dw_prev - dL/dw
+    // l.db = momentum * l.db_prev - dL/db
 
-// -- this was deleted 
-    //l.dw = m*l.dw - dL/dw - decay*l.w;
-    // next time forward/ backward
-    // add in dL/dw into l.w
-    //l.dw -= dL/dW;
-// --
-    //l.dw = momentum * l.dw
-    // Note: Use .1 instead of .01 for leaky value
-    // It's fine if tests leak on valgrind as long as you're passing tests
-    // Don't apply decay to biases, just weights. 
+    // For our weights we want to include weight decay:
+    // l.dw = l.dw - decay * l.w
+
+    // Then for both weights and biases we want to apply the updates:
+    // l.w = l.w + rate*l.dw
+    // l.b = l.b + rade*l.db
+
+
+    // Finally, we want to scale dw and db by our momentum to prepare them for the next round
+    // l.dw *= momentum
+    // l.db *= momentum
+
 }
 
 layer make_connected_layer(int inputs, int outputs, ACTIVATION activation)
