@@ -38,7 +38,7 @@ void backward_bias(matrix delta, matrix db)
 matrix forward_connected_layer(layer l, matrix in)
 {
     // TODO: 3.1 - run the network forward
-    matrix out = matmul(l.w, in);
+    matrix out = matmul(in, l.w);
     forward_bias(out, l.b);
     activate_matrix(out, l.activation);
 
@@ -76,7 +76,8 @@ void backward_connected_layer(layer l, matrix prev_delta)
     // updates for our weights, which are stored in l.dw
     // l.dw = l.dw - dL/dw
 
-    axpy_matrix(1, matmul(transpose_matrix(l.w), delta), l.dw);
+    // TODO fixme
+    // axpy_matrix(-1, matmul(delta, transpose_matrix(l.w)), l.dw);
 
     if(prev_delta.data){
         // Finally, if there is a previous layer to calculate for,

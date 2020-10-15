@@ -13,26 +13,29 @@ void activate_matrix(matrix m, ACTIVATION a)
     for(i = 0; i < m.rows; ++i) {
         double sum = 0;
         for(j = 0; j < m.cols; ++j) {
-            double x = m.data[i*m.cols + j];
+            double f_x = m.data[i*m.cols + j];
             switch (a) {
+            case LINEAR:
+                break;
             case LOGISTIC:
-                x = 1 / (1 + exp(-x));
+                f_x = 1 / (1 + exp(-f_x));
                 break;
             case RELU:
-                if (x <= 0) {
-                    x = 0;
+                if (f_x <= 0) {
+                    f_x = 0;
                 }
                 break;
             case LRELU:
-                if (x <= 0) {
-                    x = LEAKY_RATE * x;
+                if (f_x <= 0) {
+                    f_x = LEAKY_RATE * f_x;
                 }
                 break;
             case SOFTMAX:
-                x = exp(x);
+                f_x = exp(f_x);
+                break;
             }
-            m.data[i * m.cols + j] = x;
-            sum += x;
+            m.data[i * m.cols + j] = f_x;
+            sum += f_x;
         }
         if (a == SOFTMAX) {
             for (j = 0; j < m.cols; j++) {
@@ -52,25 +55,32 @@ void gradient_matrix(matrix m, ACTIVATION a, matrix d)
     int i, j;
     for(i = 0; i < m.rows; ++i){
         for(j = 0; j < m.cols; ++j){
-            double x = m.data[i*m.cols + j];
+            double f_x = m.data[i*m.cols + j];
             // TODO: multiply the correct element of d by the gradient
             switch (a)
             {
+            case LINEAR:
+                // Always multiply by grad of 1.
+                break;
             case LOGISTIC:
-                d.data[1 * m.cols + j] *= x * (1-x);
+                d.data[i * m.cols + j] *= (f_x * (1-f_x));
+                break;
             case RELU:
-                if (x = 0) {
+                if (f_x <= 0) {
                     d.data[i * m.cols + j] = 0; // Grad is zero so multiply by zero
                 }
+                break;
                 // Otherwise multiply by grad of 1.
             case LRELU:
-                if (x < 0) {
+                if (f_x < 0) {
                     d.data[i * m.cols + j] *= LEAKY_RATE;
                 }
+                break;
                 // Otherwise multiply by grad of 1.
             case SOFTMAX:
                 // Always multiply by grad of 1.
                 break;
+            }
         }
     }
 }
