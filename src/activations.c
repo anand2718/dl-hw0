@@ -1,3 +1,4 @@
+#define LEAKY_RATE 0.1
 #include <assert.h>
 #include <math.h>
 #include "uwnet.h"
@@ -24,7 +25,7 @@ void activate_matrix(matrix m, ACTIVATION a)
                 break;
             case LRELU:
                 if (x <= 0) {
-                    x = .01 * x;
+                    x = LEAKY_RATE * x;
                 }
                 break;
             case SOFTMAX:
@@ -64,7 +65,7 @@ void gradient_matrix(matrix m, ACTIVATION a, matrix d)
                 // Otherwise multiply by grad of 1.
             case LRELU:
                 if (x < 0) {
-                    d.data[i * m.cols + j] *= 0.01;
+                    d.data[i * m.cols + j] *= LEAKY_RATE;
                 }
                 // Otherwise multiply by grad of 1.
             case SOFTMAX:

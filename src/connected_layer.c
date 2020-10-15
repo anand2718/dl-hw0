@@ -82,6 +82,20 @@ void backward_connected_layer(layer l, matrix prev_delta)
 void update_connected_layer(layer l, float rate, float momentum, float decay)
 {
     // TODO
+    // assume l.dw = m*l.dw_prev - dL/dw
+    //l.dw -= decay * l.w;
+    //l.w = rate * l.dw;
+
+// -- this was deleted 
+    //l.dw = m*l.dw - dL/dw - decay*l.w;
+    // next time forward/ backward
+    // add in dL/dw into l.w
+    //l.dw -= dL/dW;
+// --
+    //l.dw = momentum * l.dw
+    // Note: Use .1 instead of .01 for leaky value
+    // It's fine if tests leak on valgrind as long as you're passing tests
+    // Don't apply decay to biases, just weights. 
 }
 
 layer make_connected_layer(int inputs, int outputs, ACTIVATION activation)
